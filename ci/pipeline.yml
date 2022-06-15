@@ -25,24 +25,24 @@ jobs:
       - task: run-my-ci-tests
         config:
           platform: linux
-          image_resources:
+          image_resource:
             type: docker-image
             source:
               repository: python
-              tag: latest
+              tag: 3.6-alpine
           inputs:
             - name: test-repo
           outputs:
             - name: test-output
           run:
             path: python
-            args:
+            args: 
               - test-repo/sample-program.py
 
       - task: ready-for-deployment
         config:
           platform: linux
-          image_resources:
+          image_resource:
             type: docker-image
             source:
               repository: busybox
@@ -58,7 +58,7 @@ jobs:
       - task: ship-to-client
         config:
           platform: linux
-          image_resources:
+          image_resource:
             type: docker-image
             source:
               repository: busybox
