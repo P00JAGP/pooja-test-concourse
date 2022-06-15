@@ -1,0 +1,72 @@
+resources:
+  - name: source-repo
+    source:
+      branch: develop
+      uri: https://github.com/P00JAGP/pooja-test-concourse.git
+    type: git
+  - name: test-repo
+    source:
+      branch: local
+      uri: https://github.com/P00JAGP/pooja-test-concourse.git
+    type: git
+  - name: release-repo
+    source:
+      branch: main
+      uri: https://github.com/P00JAGP/pooja-test-concourse.git
+    type: git
+
+jobs:
+  - name: sample-deployment-job
+    plan:
+      - get: source-repo
+        trigger: true
+      - get: test-repo
+      - get: release-repo
+      - task: run-my-ci-tests
+        config:
+          platform: linux
+          image_resources:
+            type: docker-image
+            source:
+              repository: python
+              tag: 3.6-alpine
+          inputs:
+            - name: test-repo
+          outputs:
+            - name: test-output
+          run:
+            path: python
+            args:
+              - test-repo/sample-program.py
+
+      - task: ready-for-deployment
+        config:
+          platform: linux
+          image_resources:
+            type: docker-image
+            source:
+              repository: busybox
+              tag: latest
+          inputs:
+            - name: test-output
+          outputs:
+            - name: release-output
+          run:
+            path: echo
+            args: [Ready to release.]
+
+      - task: ship-to-client
+        config:
+          platform: linux
+          image_resources:
+            type: docker-image
+            source:
+              repository: busybox
+              tag: latest
+          inputs:
+            - name: release-output
+          outputs:
+            - name: live-output
+          run:
+            path: echo
+            args: [Ready to ship.]
